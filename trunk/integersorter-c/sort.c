@@ -19,7 +19,7 @@ unsigned int * copy_array(unsigned int *, int size);
 void test_sort(SORT_FUNCTION, unsigned int *, int size);
 
 int main(int argc, char* argv[]) {
-	int size = 200000000;
+	int size = 2000;
 	unsigned
 	int* a;
 	srand(time(0));
@@ -81,6 +81,5 @@ void test_sort(SORT_FUNCTION func, unsigned int * a, int size) {
 	printf("job completed.\n");
 	//print_result(b, size);
 	printf("consumed time: %f seconds\n", get_usec(&s, &e)/1000000.0);
-	free(b);
 	return;
 }
