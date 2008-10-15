@@ -58,12 +58,9 @@ unsigned int* insertionsort(unsigned int* a, int num) {
 unsigned int* radixsort(unsigned int* a, int num) {
 	unsigned int* b1, *b2;
 	int i;
-	if (!(b1 = malloc(num * sizeof(unsigned int)))) {
-		printf("radix sort err: cannot allocate memory");
-		exit(-1);
-	}
+	b1 = a;
 	if (!(b2 = malloc(num * sizeof(unsigned int)))) {
-		printf("radix sort err: cannot allocate memory");
+		printf("radix sort err2: cannot allocate memory");
 		exit(-1);
 	}
 	memcpy(b1, a, num * sizeof(unsigned int));
@@ -74,12 +71,9 @@ unsigned int* radixsort(unsigned int* a, int num) {
 			countingsort(b2, b1, num, i);
 		}
 	}
-	if (i % 2 == 0) {
-		memcpy(a, b1, num * sizeof(unsigned int));
-	} else {
+	if (i % 2 == 1) {
 		memcpy(a, b2, num * sizeof(unsigned int));
 	}
-	free(b1);
 	free(b2);
 	return a;
 }
@@ -145,10 +139,10 @@ void merge(unsigned int *a, int p, int m, int r, unsigned int *b) {
 
 void quicksort_r(unsigned int *a, int p, int r) {
 	int pivot = partition(a, p, r);
-	if(pivot - p >1)
-		quicksort_r(a, p, pivot -1);
-	if(r - pivot >1)
-		quicksort_r(a, pivot+1, r);
+	if (pivot - p > 1)
+		quicksort_r(a, p, pivot - 1);
+	if (r - pivot > 1)
+		quicksort_r(a, pivot + 1, r);
 }
 
 int partition(unsigned int * a, int p, int r) {
