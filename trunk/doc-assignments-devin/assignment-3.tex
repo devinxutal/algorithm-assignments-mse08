@@ -1,0 +1,43 @@
+%%This is a very basic article template.
+%%There is just one section and two subsections.
+\documentclass{article}
+
+\usepackage{CJK}
+
+\begin{document}
+\begin{CJK}{UTF8}{gbsn}
+\title{Algorithm Analysis and Design, Assignment 3}
+\author{徐寅斐, 2008212589}
+\date{\today}
+\maketitle
+
+\section{CLRS, page 161, Problems 7.3}
+\subsection{Why do we analyze the average-case performance
+of a randomized algorithm and not its worst-case performance?}
+答：
+
+对于一个算法的随机化版本，它并不会改善最坏情况下的性能，它的目的是保证它不会在特定的情况下遇到最坏
+情况，这样就使得这个算法不用依赖元素的顺序，这使得算法在特定情况下遇到最坏情况的概率小了很多。
+
+\subsection{During the running of the procedure RANDOMIZED-QUICKSORT, how many calls are
+made to the random-number generator RANDOM in the worst case? How about in the best
+case? Give your answer in terms of Θ-notation.}
+答：
+
+暂时没想
+
+\section{CLRS, page 173, Exercises 8.3-4}
+\subsection{Show how to sort n integers in the range $0$ to $n^2 - 1$ in O(n)
+time.} 
+答：
+
+可以将这些数看成n进制的数，即看成
+\newline
+
+$k = \alpha n+\beta$，其中$0 \leq \alpha,\beta < n$
+\newline
+
+这样，这些数就可以看成radix为n的两位数，可以用两次countingsort来实现排序，每次countingsort花费的时间为$\Theta(n+n)
+= \Theta(n)$，所以排序的总复杂度也为$\Theta(n)$。
+\end{CJK}
+\end{document}
