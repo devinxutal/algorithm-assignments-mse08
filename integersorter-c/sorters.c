@@ -36,6 +36,7 @@ unsigned int* mergesort(unsigned int* a, int num) {
 }
 
 unsigned int* quicksort(unsigned int* a, int num) {
+	srand(time(0));
 	quicksort_r(a, 0, num - 1);
 	return a;
 }
@@ -146,8 +147,8 @@ void quicksort_r(unsigned int *a, int p, int r) {
 }
 
 int partition(unsigned int * a, int p, int r) {
-	int pivot = r; //TODO replace the r with a random function;
-	int i;
+	int pivot,i;
+	pivot = (rand()%(p-r))+p;
 	unsigned int value = a[pivot];
 	swap(a + r, a + pivot);
 	pivot = p - 1;
