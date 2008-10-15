@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 	int* a;
 	srand(time(0));
 	a = rand_array(size);
-	test_sort(quicksort, a, size);
+	test_sort(radixsort, a, size);
 	free(a);
 	return 0;
 }
@@ -70,7 +70,8 @@ unsigned long get_usec(struct timeval *s, struct timeval *e) {
 }
 
 void test_sort(SORT_FUNCTION func, unsigned int * a, int size) {
-	unsigned int * b = copy_array(a, size);
+	//unsigned int * b = copy_array(a, size);
+	unsigned int *b  = a;
 	struct timeval s, e;
 	struct timezone tz;
 	printf("start sorting %d digits...\n", size);
