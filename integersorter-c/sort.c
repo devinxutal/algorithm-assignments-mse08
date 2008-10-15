@@ -18,13 +18,50 @@ unsigned int * copy_array(unsigned int *, int size);
 
 void test_sort(SORT_FUNCTION, unsigned int *, int size);
 
+char* name = "unknown";
+
+int check_arg(char* arg) {
+	if (strlen(arg) != 2)
+		return 0;
+	if (arg[0] != '-')
+		return 0;
+	if (arg[1] != 'i' && arg[1] != 'r' && arg[1] != 'm' && arg[1] != 'q')
+		return 0;
+	return 1;
+}
+
 int main(int argc, char* argv[]) {
-	int size = 2000;
+	int size = 0;
 	unsigned
 	int* a;
+	SORT_FUNCTION func = 0;
+	if (argc != 3) {
+		printf("usage: integersort -[i|q|r|m] [size]\n");
+		exit(0);
+	}
+	if (!check_arg(argv[1])) {
+		printf("invalid argument %s, must be -[i|q|r|m]\n", argv[1]);
+		exit(0);
+	}
+
+	if(argv[1][1] == 'i'){
+		name = "insertion sort";
+		func = insertionsort;
+	}else if(argv[1][1] == 'q'){
+		name = "quick sort";
+		func = quicksort;
+	}else if(argv[1][1] == 'm'){
+		name = "merge sort";
+		func = mergesort;
+	}else if(argv[1][1] == 'r'){
+		name = "radix sort";
+		func = radixsort;
+	}
+	size = atoi(argv[2]);
+
 	srand(time(0));
 	a = rand_array(size);
-	test_sort(radixsort, a, size);
+	test_sort(func, a, size);
 	free(a);
 	return 0;
 }
@@ -71,7 +108,7 @@ unsigned long get_usec(struct timeval *s, struct timeval *e) {
 
 void test_sort(SORT_FUNCTION func, unsigned int * a, int size) {
 	//unsigned int * b = copy_array(a, size);
-	unsigned int *b  = a;
+	unsigned int *b = a;
 	struct timeval s, e;
 	struct timezone tz;
 	printf("start sorting %d digits...\n", size);
@@ -80,6 +117,6 @@ void test_sort(SORT_FUNCTION func, unsigned int * a, int size) {
 	gettimeofday(&e, &tz);
 	printf("job completed.\n");
 	//print_result(b, size);
-	printf("consumed time: %f seconds\n", get_usec(&s, &e)/1000000.0);
+	printf("consumed time: %f seconds\n", get_usec(&s, &e) / 1000000.0);
 	return;
 }
