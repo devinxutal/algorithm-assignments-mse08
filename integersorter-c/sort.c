@@ -34,6 +34,10 @@ int main(int argc, char* argv[]) {
 	int size = 0;
 	unsigned
 	int* a;
+	for (size = 0; size < 10; size++) {
+		srand(time(0));
+		printf("%u\n", rand());
+	}
 	SORT_FUNCTION func = 0;
 	if (argc != 3) {
 		printf("usage: integersort -[i|q|r|m] [size]\n");
@@ -44,16 +48,16 @@ int main(int argc, char* argv[]) {
 		exit(0);
 	}
 
-	if(argv[1][1] == 'i'){
+	if (argv[1][1] == 'i') {
 		name = "insertion sort";
 		func = insertionsort;
-	}else if(argv[1][1] == 'q'){
+	} else if (argv[1][1] == 'q') {
 		name = "quick sort";
 		func = quicksort;
-	}else if(argv[1][1] == 'm'){
+	} else if (argv[1][1] == 'm') {
 		name = "merge sort";
 		func = mergesort;
-	}else if(argv[1][1] == 'r'){
+	} else if (argv[1][1] == 'r') {
 		name = "radix sort";
 		func = radixsort;
 	}
