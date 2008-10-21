@@ -1,0 +1,123 @@
+%%This is a very basic article template.
+%%There is just one section and two subsections.
+\documentclass{article}
+
+\usepackage{CJK}
+\usepackage{clrscode}
+
+\begin{document}
+\begin{CJK}{UTF8}{gbsn}
+\title{Algorithm Analysis and Design, Assignment 4}
+\author{徐寅斐, 2008212589}
+\date{\today}
+\maketitle
+
+\section{CLRS, page 356, Exercises 15.4-4}
+
+\subsection*{思路：}
+
+\subsubsection*{$2\cdot\min(m,n)$}
+
+考虑到在计算c表的某个特定行时，只有上一行的值会被用到，这样，
+在计算过程中只需要两行数据就行了，假设为cur和pre两个数组，
+pre中存放上一行的数据，cur中存放此行的值，cur中的值计算完
+成后，将cur的数据拷贝至p中，继续计算下一行的值。因为c表中
+c[i][0]永远为0,因此此项不用记录，因此cur和pre的长度为
+length（Y）。只要我们将长度小的序列成为Y，就能保证空间复杂度
+为$2\cdot\min(m, n)$。
+
+\subsubsection*{$\min(m,n) + O(1)$}
+
+上述算法还可以优化:先假设$n = \min(m,n)$。计算cur[j]完成之后，pre[0\ldots j-1]
+就不需要了。而cur[j\ldots n-1]还没有填（cur[j]马上要用到），
+也就是说，在实际计算过程中，只有n＋1个item是需要的。因此，只
+需要一个数组c[n]和两个变量tmp1和tmp2，数组
+先全部初始化成0，tmp1 ＝ 0， 令i＝0\ldots n, 计算当前行的所有值。
+第i个值计算出来后暂时不放入c[i]，而是放到tmp1，计算c[i+1]放到tmp2，
+此时再把tmp1中的值放入c[i],将tmp2中的值放入tmp1，然后计算c[i+2]放入
+tmp2，如此循环。
+
+\subsection*{伪码：}
+
+\subsubsection*{$2\cdot\min(m,n)$}
+
+为了使代码能尽可能简洁，我使用了两个$\min(m,n)+1$的数组，而不是$\min(m,n)$的数组，
+这样可以节省很多判断（因为使用$\min(m,n)$的数组时，没有存储j＝0时的值，计算时必须判
+断j＝1时的特殊情况，这会使得代码很难看，这两种数组效果其实是一样的）。
+\begin{codebox}
+\Procname{$\proc{LCS-Length(X,Y)}$}
+\li \Comment 将较短的数组定为Y
+\li \If $\id{length}[X] < \id{length}[Y]$
+\li 	\Then $Z \gets X$
+\li				$X \gets Y$
+\li				$Y \gets Z$
+	 	\End
+\li $m \gets \id{length}[X]$
+\li $n \gets \id{length}[Y]$
+\li \For $j \gets 0$ \To $n$
+\li 	\Do $pre[j] \gets 0$
+		\End
+\li \For $i \gets 1$ \To $m$
+\li 	\Do $cur[0] \gets 0$
+\li			\For $ j \gets 1 $ \To $n$
+\li			\Do \If $x_i = y_j$
+\li					\Then $cur[j] \gets pre[j-1]+1$
+\li					\Else	\If $pre[j] \geq cur[j-1]$
+\li								\Then $cur[j] \gets pre[j]$
+\li								\Else $cur[j] \gets cur[j-1]$
+								\End
+					\End
+			\End		
+\li			\Comment 将 cur的内容拷贝到pre中，以开始下一行
+\li			\For $ j \gets 0$ \To $n$
+\li				\Do $pre[j] \gets cur[j]$
+				\End
+		\End
+\li \Return $c[n]$
+\end{codebox}
+
+\subsubsection*{$\min(m,n) + O(1)$}
+
+与上题一样这里使用了一个$\min(m,n) - 1$的数组
+
+\begin{codebox}
+\Procname{$\proc{LCS-Length(X,Y)}$}
+\li \Comment 将较短的数组定为Y
+\li \If $\id{length}[X] < \id{length}[Y]$
+\li 	\Then $Z \gets X$
+\li				$X \gets Y$
+\li				$Y \gets Z$
+	 	\End
+\li $m \gets \id{length}[X]$
+\li $n \gets \id{length}[Y]$
+\li \For $j \gets 0$ \To $n$
+\li 	\Do $[j] \gets 0$
+		\End
+\li $a \gets 0$
+\li $b \gets 0$		
+\li \For $i \gets 1$ \To $m$
+\li 	\Do \For $ j \gets 1 $ \To $n$
+\li			\Do \If $x_i = y_j$
+\li					\Then $a \gets c[j-1]$
+\li					\Else	\If $c[j] \geq b$
+\li								\Then $a \gets c[j]$
+\li								\Else $a \gets b$
+								\End
+					\End
+					
+\li				\Comment 将b放到j－1中，将a放入b中
+\li				$c[j-1] \gets b$
+\li				$b \gets a$
+			\End		
+		\End
+\li \Return $c[n]$
+\end{codebox}
+
+\section{CLRS, page 356, Exercises 15.4-6}
+
+\section{CLRS, page 364, Problems 15-1}
+
+\section{CLRS, page 368, Problems 15-6}
+
+\end{CJK}
+\end{document}
