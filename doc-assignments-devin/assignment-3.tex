@@ -12,19 +12,31 @@
 \maketitle
 
 \section{CLRS, page 161, Problems 7.3}
-\subsection{Why do we analyze the average-case performance
-of a randomized algorithm and not its worst-case performance?}
-答：
+\subsection*{(a)}
 
-对于一个算法的随机化版本，它并不会改善最坏情况下的性能，它的目的是保证它不会在特定的情况下遇到最坏
-情况，这样就使得这个算法不用依赖元素的顺序，这使得算法在特定情况下遇到最坏情况的概率小了很多。
+当$j-i<3$时，该排序算法对这几个数进行了两两排序，结果肯定有序。
 
-\subsection{During the running of the procedure RANDOMIZED-QUICKSORT, how many calls are
-made to the random-number generator RANDOM in the worst case? How about in the best
-case? Give your answer in terms of Θ-notation.}
-答：
+假设当$j-i<n$时可以对数组进行排序，则当$j-i=n$时，设$k =
+\lfloor
+\frac{n+1}{3}\rfloor$，这时的k是小于等于总个数的三分之一的。
 
-暂时没想
+在第一次递归排序时算法对$[i,j-k]$进行排序，排序完成后$[i+k,j-k]$存储的是前面排序范围
+内最大的几个数，可以保证，在前面$k$个数不可能是最大的$k$个数。
+
+第二轮对[i+k,j]内的数进行排序，由于数组的前k个数不可能含有最大的k个数，这样，数组中最大的$k$个数肯定已经被排序好放在[j-k+1,j]的位置了。
+
+第三次排序对[i,j-k]排序，由于最大的k个数已经就位，这次排序过后，所有的数都已经排好序了。
+
+假设成立，这个明完毕。
+
+\subsection*{(b)}
+
+由于这个算法的递归深度不会变化，所以不存在什么最坏情况（无非是多交换几次，对复杂度数量级没有影响）。根据排序算法的过程，可以看出排序算法的递推式为$T(n) =
+3T(\frac{2n}{3}) +1 $，根据组定律，$T(n) = \Theta( n^{{\log_b}a}) =
+\Theta(n^{{\log_\frac{3}{2}}3}) \approx \Theta(n^{2.7})$。
+
+\subsection*{（c）}
+其他排序算法的最坏情况最多是$O(n^2)$,比这个算法的最坏情况好。
 
 \section{CLRS, page 173, Exercises 8.3-4}
 \subsection{Show how to sort n integers in the range $0$ to $n^2 - 1$ in O(n)
