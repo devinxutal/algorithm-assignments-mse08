@@ -6,7 +6,7 @@ public class LMISFinder {
 
 	public int[] find(int[] seqs) {
 		int[] m = new int[seqs.length + 1];
-		int[] p = new int[seqs.length + 1];
+		int[] p = new int[seqs.length];
 		for (int i = 0; i < m.length; i++) {
 			m[i] = Integer.MAX_VALUE;
 		}
@@ -26,15 +26,22 @@ public class LMISFinder {
 	private int bsearch(int[] x, int[] m, int p, int r, int value) {
 		if (r < p)
 			return 0;
-		else if (r == p)
-			return p;
+		else if (r == p) {
+			if (x[m[p]] < value)
+				return p;
+			else
+				return 0;
+		}
 		int middle = (r + p - 1) / 2;
 		if (x[m[middle]] < value && x[m[middle + 1]] >= value) {
 			return middle;
 		} else if (x[m[middle]] < value) {
 			return bsearch(x, m, middle + 1, r, value);
 		} else if (middle == p) {
-			return p;
+			if (x[m[p]] < value)
+				return p;
+			else
+				return 0;
 		} else {
 			return bsearch(x, m, p, middle - 1, value);
 		}
@@ -49,10 +56,11 @@ public class LMISFinder {
 		return result;
 	}
 
+	// Just for test
 	public static void main(String[] args) {
-		int[] seqs = new int[] { 1, 6, 4, 3, 5, 7,3,5,6,8,4,6,6,9,10 };
+		int[] seqs = new int[] { 5, 4, 2, 3, 45, 5 };
 		LMISFinder finder = new LMISFinder();
-		int []result = finder.find(seqs);
+		int[] result = finder.find(seqs);
 		System.out.println(Arrays.toString(seqs));
 		System.out.println(Arrays.toString(result));
 	}

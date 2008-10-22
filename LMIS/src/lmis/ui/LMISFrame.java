@@ -1,7 +1,7 @@
 package lmis.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
@@ -19,6 +19,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
@@ -77,8 +78,8 @@ public class LMISFrame extends JFrame {
 		sequenceArea = new JTextArea();
 		sequenceArea.setEditable(true);
 		sequenceArea.setLineWrap(true);
-		sequenceArea.setBorder(BorderFactory.createEtchedBorder());
-		pointPane.add("Center", sequenceArea);
+		sequenceArea.setFont(new Font(null,Font.PLAIN,12));
+		pointPane.add("Center", new JScrollPane(sequenceArea));
 		JPanel buttonPanel1 = new JPanel();
 		inputSequenceButton = new JButton("Input Sequence");
 		inputSequenceButton.addActionListener(new InputSequenceAction());
@@ -112,8 +113,8 @@ public class LMISFrame extends JFrame {
 		logArea = new JTextArea();
 		logArea.setEditable(false);
 		logArea.setLineWrap(true);
-		logArea.setBorder(BorderFactory.createEtchedBorder());
-		resultPane.add("Center", logArea);
+		logArea.setFont(new Font(null,Font.PLAIN,12));
+		resultPane.add("Center", new JScrollPane(logArea));
 		panel.add(resultPane);
 	}
 
@@ -138,6 +139,7 @@ public class LMISFrame extends JFrame {
 		}
 
 		if (resultCalculated) {
+			logArea.setText("");
 			logArea.append("Subsequence Length: \t" + result.length + "\n\n");
 			logArea.append("Consumed Time: \t" + (time) / 1000000 + "ms\n\n");
 			logArea.append("Longest Monotonically Increasing Sequence:\n\n");
@@ -193,6 +195,7 @@ public class LMISFrame extends JFrame {
 
 	class StartAction extends AbstractAction {
 		public void actionPerformed(ActionEvent arg0) {
+			logArea.setText("");
 			if (!validateSequence()) {
 				logArea
 						.setText("Format Error: please input the sequence again.");
@@ -213,6 +216,7 @@ public class LMISFrame extends JFrame {
 		public void actionPerformed(ActionEvent arg0) {
 			sequenceArea.setText("");
 			sequenceArea.setEditable(true);
+			logArea.setText("");
 			setSequence(null);
 			resultCalculated = false;
 		}
@@ -222,6 +226,7 @@ public class LMISFrame extends JFrame {
 		public void actionPerformed(ActionEvent arg0) {
 			sequenceArea.setText("");
 			sequenceArea.setEditable(false);
+			logArea.setText("");
 			RandomSequenceDialog dialog = new RandomSequenceDialog(
 					LMISFrame.this);
 			dialog.setVisible(true);
