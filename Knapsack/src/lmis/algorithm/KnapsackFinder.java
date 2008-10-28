@@ -1,59 +1,85 @@
 package lmis.algorithm;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 
 public class KnapsackFinder {
 
-	public int[] find(int[] seqs) {
-		int[] m = new int[seqs.length + 1];
-		int[] p = new int[seqs.length + 1];
-		for (int i = 0; i < m.length; i++) {
-			m[i] = Integer.MAX_VALUE;
+	public static final int WEIGHT = 0;
+	public static final int VALUE = 1;
+
+	public int[][] find(int[][] items, int cap) {
+		int[][] c = new int[items.length + 1][cap + 1];
+		for (int w = 0; w < c[0].length; w++) {
+			c[0][w] = 0;
 		}
-		int len = 0;
-		m[0] = -1;
-		for (int i = 0; i < seqs.length; i++) {
-			int j = bsearch(seqs, m, 1, len, seqs[i]);
-			p[i] = m[j];
-			if (j == len || seqs[i] < seqs[m[j + 1]]) {
-				m[j + 1] = i;
-				len = len > j + 1 ? len : j + 1;
+		for (int i = 1; i < c.length; i++) {
+			for (int w = 0; w < c[i].length; w++) {
+				if (w == 0) {
+					c[i][w] = 0;
+				} else {
+					int weight = items[i - 1][WEIGHT];
+					int value = items[i - 1][VALUE];
+					if (weight <= w) {
+						if (c[i - 1][w - weight] + value > c[i - 1][w]) {
+							c[i][w] = c[i - 1][w - weight] + value;
+						} else {
+							c[i][w] = c[i - 1][w];
+						}
+					} else {
+						c[i][w] = c[i - 1][w];
+					}
+				}
 			}
 		}
-		return getLMIS(seqs, m, p, len);
+		return c;
 	}
 
-	private int bsearch(int[] x, int[] m, int p, int r, int value) {
-		if (r < p)
-			return 0;
-		else if (r == p)
-			return p;
-		int middle = (r + p - 1) / 2;
-		if (x[m[middle]] < value && x[m[middle + 1]] >= value) {
-			return middle;
-		} else if (x[m[middle]] < value) {
-			return bsearch(x, m, middle + 1, r, value);
-		} else if (middle == p) {
-			return p;
-		} else {
-			return bsearch(x, m, p, middle - 1, value);
+	public LinkedList<Integer> whatToTake(int[][] items, int cap) {
+		int[][] result = find(items, cap);
+		LinkedList<Integer> list = new LinkedList<Integer>();
+
+		getResult(result, items, list);
+		return list;
+	}
+
+	private void getResult(int[][] c, int[][] items, LinkedList<Integer> list) {
+		int i = c.length - 1, w = c[i].length - 1;
+		while (i > 0) {
+			if (c[i][w] >= 0) {
+				if (c[i][w] != c[i - 1][w]) {
+					list.addFirst(i - 1);
+					w = w - items[i - 1][WEIGHT];
+				}
+			}
+			i--;
 		}
 	}
 
-	private int[] getLMIS(int[] x, int[] m, int[] p, int len) {
-		int[] result = new int[len];
-		int index = len - 1;
-		for (int i = m[len]; i >= 0; i = p[i]) {
-			result[index--] = x[i];
+	public void printResult(int[][] c, int[][] items) {
+		System.out.println(Arrays.toString(c[0]));
+		System.out.println(Arrays.toString(c[1]));
+		System.out.println(Arrays.toString(c[2]));
+		System.out.println(Arrays.toString(c[3]));
+		System.out.println("==========Result==========");
+		int i = c.length - 1, w = c[i].length - 1;
+		while (i > 0) {
+			if (c[i][w] >= 0) {
+				if (c[i][w] != c[i - 1][w]) {
+					System.out.println("[ITEM " + (i - 1) + "] weight: "
+							+ items[i - 1][WEIGHT] + ", value: "
+							+ items[i - 1][VALUE]);
+					w = w - items[i - 1][WEIGHT];
+				}
+			}
+			i--;
 		}
-		return result;
 	}
 
 	public static void main(String[] args) {
-		int[] seqs = new int[] { 1, 6, 4, 3, 5, 7,3,5,6,8,4,6,6,9,10 };
+		int[][] items = new int[][] { { 10, 60 }, { 20, 100 }, { 30, 180 },
+				{ 40, 500 } };
 		KnapsackFinder finder = new KnapsackFinder();
-		int []result = finder.find(seqs);
-		System.out.println(Arrays.toString(seqs));
-		System.out.println(Arrays.toString(result));
+		finder.printResult(finder.find(items, 60), items);
 	}
 }

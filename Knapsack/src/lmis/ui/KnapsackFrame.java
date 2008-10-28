@@ -1,12 +1,11 @@
 package lmis.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 
@@ -19,6 +18,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
@@ -28,15 +28,16 @@ public class KnapsackFrame extends JFrame {
 	private static final int WINDOW_WIDTH = 500;
 	private static final int WINDOW_HEIGHT = 700;
 
-	private JTextArea sequenceArea;
+	private JTextArea caseArea;
 	private JTextArea logArea;
 	private JButton inputCaseButton;
 	private JButton randomCaseButton;
 	private JButton startButton;
 	private JComboBox algorithmComboBox;
 
-	private int[] sequence;
-	private int[] result;
+	private int[][] items;
+	private int capacity;
+	private List<Integer> result;
 	private long time;
 	private boolean manual = true;
 	private boolean resultCalculated = false;
@@ -71,20 +72,19 @@ public class KnapsackFrame extends JFrame {
 		panel.setLayout(bl);
 
 		JPanel pointPane = new JPanel(new BorderLayout());
-		JLabel pointLabel = new JLabel(
-				"construct a test case:");
+		JLabel pointLabel = new JLabel("construct a test case:");
 		pointPane.add("North", pointLabel);
-		sequenceArea = new JTextArea();
-		sequenceArea.setEditable(true);
-		sequenceArea.setLineWrap(true);
-		sequenceArea.setBorder(BorderFactory.createEtchedBorder());
-		pointPane.add("Center", sequenceArea);
+		caseArea = new JTextArea();
+		caseArea.setEditable(true);
+		caseArea.setLineWrap(true);
+		caseArea.setBorder(BorderFactory.createEtchedBorder());
+		pointPane.add("Center", new JScrollPane(caseArea));
 		JPanel buttonPanel1 = new JPanel();
 		inputCaseButton = new JButton("Input Case");
 		inputCaseButton.addActionListener(new InputSequenceAction());
 		buttonPanel1.add(inputCaseButton);
 		randomCaseButton = new JButton("Random Case");
-		randomCaseButton.addActionListener(new RandomSequenceAction());
+		randomCaseButton.addActionListener(new RandomCaseAction());
 		buttonPanel1.add(randomCaseButton);
 
 		pointPane.add("South", buttonPanel1);
@@ -95,7 +95,7 @@ public class KnapsackFrame extends JFrame {
 		JPanel startPane = new JPanel();
 		startPane.setLayout(new BoxLayout(startPane, BoxLayout.X_AXIS));
 		algorithmComboBox = new JComboBox(
-				new String[] { "nlogn dynamic programming" });
+				new String[] { "O(nw) dynamic programming" });
 		startButton = new JButton("       Start       ");
 		startButton.addActionListener(new StartAction());
 		startPane.add(new JLabel("Select Algorithm:"));
@@ -113,46 +113,73 @@ public class KnapsackFrame extends JFrame {
 		logArea.setEditable(false);
 		logArea.setLineWrap(true);
 		logArea.setBorder(BorderFactory.createEtchedBorder());
-		resultPane.add("Center", logArea);
+		resultPane.add("Center", new JScrollPane(logArea));
 		panel.add(resultPane);
 	}
 
-	public int[] getSequence() {
-		return sequence;
+	public int[][] getItems() {
+		return items;
 	}
 
-	public void setSequence(int[] sequence) {
-		this.sequence = sequence;
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
+	}
+
+	public int getCapacity() {
+		return capacity;
+	}
+
+	public void setItems(int[][] items) {
+		this.items = items;
 	}
 
 	private void refresh() {
-		int[] seqs = this.getSequence();
+		caseArea.setText("");
+		logArea.setText("");
+		int[][] seqs = this.getItems();
 		if (seqs == null || seqs.length == 0) {
-			this.sequenceArea
-					.setText("No case defined, please one, the following case is just a sample:");
-			this.sequenceArea.append("\n <weight of item1> <value of item1");
+			this.caseArea
+					.setText("No case defined, please construct one, the following case is just a sample:");
+			this.caseArea.append("\n<bag capacity>");
+			this.caseArea.append("\n<weight of item 1> <value of item 1>");
+			this.caseArea.append("\n<weight of item 2> <value of item 2>");
+			this.caseArea.append("\n<weight of item 3> <value of item 3>");
+			this.caseArea.append("\n<weight of item 4> <value of item 4>");
+			this.caseArea.append("\n...");
 		} else {
-			sequenceArea.setText("");
-			for (int i : seqs) {
-				sequenceArea.append(i + "\n");
+			caseArea.setText("");
+			caseArea.append(this.getCapacity() + "\n");
+			for (int[] item : seqs) {
+				caseArea.append(item[0] + "\t" + item[1] + "\n");
 			}
 		}
 
 		if (resultCalculated) {
-			logArea.append("Subsequence Length: \t" + result.length + "\n\n");
-			logArea.append("Consumed Time: \t" + (time) / 1000000 + "ms\n\n");
-			logArea.append("Longest Monotonically Increasing Sequence:\n\n");
-			logArea.append(Arrays.toString(result));
+			logArea.append("You can take " + getResult().size() + " items.\n");
+			int w = 0, v = 0;
+			for (int i : getResult()) {
+				w += getItems()[i][0];
+				v += getItems()[i][1];
+			}
+			logArea.append("Total Weight: " + w + "\n");
+			logArea.append("Total Value: " + v + "\n");
+			logArea.append("Consumed Time: " + (time) / 1000000 + "ms\n\n");
+			logArea.append("Items Should Be Taken:\n\n");
+			for (int i : getResult()) {
+				logArea.append("[ITEM " + i + "]");
+				logArea.append("  WEIGHT = " + getItems()[i][0]);
+				logArea.append("  VALUE = " + getItems()[i][1]+"\n");
+			}
 		} else {
 			this.logArea.setText("");
 		}
 	}
 
-	public int[] getResult() {
+	public List<Integer> getResult() {
 		return result;
 	}
 
-	public void setResult(int[] result) {
+	public void setResult(List<Integer> result) {
 		this.result = result;
 	}
 
@@ -164,29 +191,47 @@ public class KnapsackFrame extends JFrame {
 		this.time = time;
 	}
 
-	private boolean validateSequence() {
+	private boolean validateCase() {
 		if (!manual) {
 			return true;
 		} else {
-			String[] lines = this.sequenceArea.getText().split("\n");
-			LinkedList<Integer> list = new LinkedList<Integer>();
+			String[] lines = this.caseArea.getText().split("\n");
+			LinkedList<Integer[]> list = new LinkedList<Integer[]>();
+			int cap = -1;
 			for (String line : lines) {
-				if (line.trim().length() == 0)
+				line = line.trim();
+				if (line.length() == 0)
 					continue;
 				try {
-					int value = Integer.parseInt(line.trim());
-					list.add(value);
+					if (cap < 0) {
+						cap = Integer.parseInt(line);
+						if (cap < 0) {
+							throw new NumberFormatException();
+						}
+						this.setCapacity(cap);
+					} else {
+						String[] values = line.split("[\\s|\\t]");
+						if (values.length != 2) {
+							throw new NumberFormatException();
+						}
+						Integer[] ints = new Integer[2];
+						ints[0] = Integer.parseInt(values[0]);
+						ints[1] = Integer.parseInt(values[1]);
+						list.add(ints);
+					}
 				} catch (NumberFormatException e) {
 					return false;
 				}
 			}
-			int[] sequence = new int[list.size()];
+			int[][] items = new int[list.size()][2];
 			int i = 0;
-			Iterator<Integer> itr = list.iterator();
+			Iterator<Integer[]> itr = list.iterator();
 			while (itr.hasNext()) {
-				sequence[i++] = itr.next().intValue();
+				Integer[] ints = itr.next();
+				items[i][0] = ints[0].intValue();
+				items[i++][1] = ints[1].intValue();
 			}
-			setSequence(sequence);
+			setItems(items);
 			return true;
 		}
 
@@ -194,7 +239,7 @@ public class KnapsackFrame extends JFrame {
 
 	class StartAction extends AbstractAction {
 		public void actionPerformed(ActionEvent arg0) {
-			if (!validateSequence()) {
+			if (!validateCase()) {
 				logArea
 						.setText("Format Error: please input the sequence again.");
 				return;
@@ -202,7 +247,7 @@ public class KnapsackFrame extends JFrame {
 			Timer timer = new Timer();
 			KnapsackFinder finder = new KnapsackFinder();
 			long start = System.nanoTime();
-			setResult(finder.find(getSequence()));
+			setResult(finder.whatToTake(getItems(), getCapacity()));
 			long end = System.nanoTime();
 			setTime(end - start);
 			resultCalculated = true;
@@ -212,30 +257,27 @@ public class KnapsackFrame extends JFrame {
 
 	class InputSequenceAction extends AbstractAction {
 		public void actionPerformed(ActionEvent arg0) {
-			sequenceArea.setText("");
-			sequenceArea.setEditable(true);
-			setSequence(null);
+			caseArea.setText("");
+			caseArea.setEditable(true);
+			setItems(null);
 			resultCalculated = false;
 		}
 	}
 
-	class RandomSequenceAction extends AbstractAction {
+	class RandomCaseAction extends AbstractAction {
 		public void actionPerformed(ActionEvent arg0) {
-			sequenceArea.setText("");
-			sequenceArea.setEditable(false);
-			RandomSequenceDialog dialog = new RandomSequenceDialog(
-					KnapsackFrame.this);
-			dialog.setVisible(true);
-			if (dialog.getReturnStatus() == RandomSequenceDialog.OK) {
-				int quantity = dialog.getQuantity();
-				int seqs[] = new int[quantity];
-				Random rand = new Random();
-				for (int i = 0; i < quantity; i++) {
-					seqs[i] = rand.nextInt(quantity);
-				}
-				setSequence(seqs);
-				refresh();
+			caseArea.setText("");
+			caseArea.setEditable(false);
+			Random rand = new Random();
+			int[][] items = new int[rand.nextInt(100)][2];
+			int cap = 500 + rand.nextInt(500);
+			for (int i = 0; i < items.length; i++) {
+				items[i][0] = (1 + rand.nextInt(19)) * 5;
+				items[i][1] = (1 + rand.nextInt(29)) * 10;
 			}
+			setCapacity(cap);
+			setItems(items);
+			refresh();
 			resultCalculated = false;
 		}
 	}
