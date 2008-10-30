@@ -1,5 +1,4 @@
-%%This is a very basic article template.
-%%There is just one section and two subsections.
+
 \documentclass{article}
 
 \usepackage{CJK}
@@ -16,17 +15,151 @@
 
 \subsection*{思路：}
 
+正如题中所述， $root[i, j - 1] \leq root[i, j] \leq root[i + 1, j]$，在算法中作最内层循环时，
+不需要将$r$从$i$到$j$全部遍历一遍，而只需要从$root[i, j - 1]$遍历到$root[i + 1, j]$
+即可，即$root[i,r-1]\leq r \leq root[r+1,j]$。
 \subsection*{伪码：}
 
 \begin{codebox}
-\Procname{$\proc{LCS-Length(X,Y)}$}
+\Procname{$\proc{Optimal-BST}(p,q,n)$}
+\li	\For $i \gets 1$ \To $n+1$
+\li		\Do $e[i,i-1] \gets q_{i-1}$
+\li			$w[i,i-1] \gets q_{i-1}$
+		\End
+\li	\For $l \gets 1$ \To $n$
+\li		\Do \For $i \gets 1$ \To $n-l+1$
+\li			\Do $j \gets i+l-1$
+\li				$e[i,j] \gets \infty$
+\li 			$w[i,j] \gets w[i,j-1]+p_j + q_j$
+\li				\For $r \gets root[i, j-1]$ \To $root[i+1,j]$
+\li 				\Do $t \gets e[i,r-1] + e[r+1, j] + w[i,j]$
+\li						\If $t < e[i,j]$
+\li							\Then $e[i,j] \gets t$
+\li									$root[i,j \gets r]$
+							\End
+					\End
+			\End
+		\End
+\li \Return $e$ and $root$
 \end{codebox}
 
 \section{CLRS, page 384, Exercises 16.2-2}
+\subsection{算法设计描述}
+此题可以这样思考：假设小偷已经拿了一包重量不超过$w$的最值钱的东西$P$，并且其中包含
+一个物品$i$，那么，$P - i$是除去物品$i$之后的$n-1$件物品中重量不超过$w-w_i$的
+最值钱的一包东西，这可以通过cut and paste方法证明。
+假设$c[i,w]$表示在前$i$个物品中取出的不超过w重量的最大价值，第$i$个物品为$item_i$，
+其重量为$w_i$，价值为$v_i$，并假设前面已经算出了前$i-1$个物品时不超过各个$w$值的最大价值$c[i-1,w]$，
+接下来算前$i$个物品中取出不超过$w$重量的$c[i,w]$：如果$item_i$入选，则其余部分是
+在前$i-1$个物品中取出的不超过$w-w_i$的最大价值的物品，其价值为$c[i-1,w-w_i]$，
+这样总价值为$c[i-1,w-w_i]+v_i$；如果$item_i$没有入选，则表示选出的物品是在前
+$i-1$个物品中选出的不超过$w$重量的最大价值的物品，其价值为$c[i-1,w]$，我们需要做的，
+就是判断前面给出的两个价值那个更大。递归表达式：\newline
+
+\begin{displaymath}
+c[i,w] = \left \{ \begin{array}{ll}
+                          0 	&i=0 \ or \ w = 0\\
+                          c[i-1,w] 		& i > 0 \ and \ w_i > w\\
+                          max(c[i-1,w-w_i]+v_i, c[i-1,w]) 	& i > 0 \ and \ w_i \leq w
+                  \end{array} \right.
+\end{displaymath}
+
+所以，对于$c$数组的计算，我们可以从$i=0$开始逐行计算，$i=0$时全部$c[0,w]$初始化成0，
+计算到最后$c[n,w]$中便是存储的最大的价值，此题不需要额外的数组去记录最后被选择的物品，
+直接用$c$数组就行：从i=n，w = W开始，当$c[i,w] \neq c[i-1, w - w_i]$时，
+说明$item_i$被选中，$i = i-1, w = w-w_i$，继续寻找下一个；否则没被选中，则
+$i = i-1, w = w$，继续寻找下一个。
 
 \section{CLRS, page 384, Problems 16.2-6}
 
-\section{CLRS, page 392, Problems 16.3-6}
+Problem 9.2 中已经给出了在线性时间内找出带权中间值，在这个问题中，我们可以把每个物品
+的价重比($v/w$)看成物品的权重，因此我们可以在线性时间中找出$v/w$的中间值m,接下来再用
+线性的时间将所有物品分成3组：$G = \{ i | v_i/w_i > m\}$，$E = \{ i | v_i/w_i = m\}$，
+$L = \{ i | v_i/w_i < m\}$，很显然，先从价重比最高的开始拿，即从G中开始拿，
+再拿之前，先计算出$G$、$E$的总质量：$W_G = \sum_{i \in G}w_i$，$W_E = \sum_{i \in
+E}w_i$，这个也需要线性时间完成。
+接下来分情况讨论：
+\begin{itemize}
+\item 如果 $W_G > W$，则继续递归分解G，从中找出质量为$W$的物品。
+\item 如果 $W_G <= W$ 并且$W_G + W_E \geq
+W$，则说明用G和E中的物品可以填满整个包裹，那么就将G中的物品全部取出，
+并用E中的物品将包括填满（优于E中的物品价重比是一样的，所以不需要考虑拿哪个）。
+\item 如果 $W_G + W_E < W$，说明G和E中的物品还不能填满包裹，则取出G和E中的所有物品，并递归的
+调用上述分解过程，从L中取出质量为$W - W_G - W_E$的物品。
+\end{itemize}
+算法复杂度分析：此算法中使用了递归，并且每次分解时自问题最大不超过原问题的二分之一，并且只有一个子问题，
+每次递归使用的时间都是线性的。因此，递归表达式可写为$T(n) \leq T(\frac{n}{2})+\Theta(n)$，因此，
+根据祖定律，时间复杂度为$O(n)$。
 
+\section{CLRS, page 392, Problems 16.3-6}
+\subsection{算法描述}
+可以使用一颗满三叉数来表示三叶子分别表示0、1、2，算法于霍夫曼编码基本类似，使用一个最小队列，先把所有的节点压入队列中，
+然后每次新建一个节点，取出频率最小的三个节点作为新建节点的叶子，然后把新节点插入队列中，其频率为
+三个子节点的频率之和。如此循环，直到最后三个节点被取出挂到新建的根节点，由于初始节点如果为偶数时，
+最后会剩两个节点，而不是三个，因此在初始节点为偶数的情况下，先增加一个频率为0的虚拟节点。
+\subsection{证明}
+\textbf{Lemma 1:} Let $C$ be an alphabet in which each character $c \in C$ has
+frequency $f[c]$. Let $x,y$ and $z$ be three characters in $C$ having the lowest
+frequencies. Then there exists an optimal prefix code for $C$ in which the code
+words for $x,y$ and $z$ have the same length and differ only in the last
+digit.\newline
+
+证明：设$a,b,c$为最优树$T$中具有最大深度的兄弟节点，不失一般性，我们假设$f[a]\leq f[b] \leq f[c]$
+且$f[x]\leq f[y] \leq f[z]$。由于$x,y,z$是频率最低的三个点，所以$f[x]\leq f[a]$，$f[y]\leq
+f[b]$，$f[z]\leq f[c]$。交换$a,x$的位置形成新树$T'$，则两棵树之间的代价差为：\newline
+\begin{eqnarray*}
+B(T) - B(T') &=& \sum_{c\in C}f(c)d_T(c) - \sum_{c\in C}f(c)d_{T'}(c)\\
+ &=& f[x]d_T(x)+f[a]d_T(a) - f[x]d_{T'}(x)+f[a]d_{T'}(a)\\
+ &=& f[x]d_T(x)+f[a]d_T(a) - f[x]d_T(a)+f[a]d_T(x)\\
+ &=& (f[a]-f[x])(d_T(a)-d_T(x)) \geq 0
+\end{eqnarray*}
+
+所以，$x$和$a$交换不会增加代价。同理，交换$y$和$b$，$z$和$c$同样也不会增加代价。因此，在将所有
+三对节点交换之后，所得的树仍然是一颗最优树，而且$x,y,z$是三个同样具有最大深度的兄弟节点，从而证明了
+Lemma 1。
+
+所以，构造一颗最优树的过程可以从合并三个频率最低的字符开始，这就是我们的贪心选择，我们可以认为一次合并
+的代价是三个合并节点的频率之和。在每一次合并中，本算法都选择一个代价最小的合并。\newline
+
+\textbf{Lemma 2:} Let $C$ be a given alphabet with frequency $f[c]$ defined for
+each character $c \in C$. Let $x,y,z$ be three characters in $C$ with minimum
+frequency. Let $C'$ be the alphabet $C$ with characters $x, y, z$ removed and
+(new) character $w$ added, so that $C' = C - {x, y, z} \cup {w}$; define $f$ for
+$C'$ as for $C$, except that $f[w] = f[x] + f[y] + f[z]$. Let $T'$ be any tree
+representing an optimal prefix code for the alphabet $C'$. Then the tree $T$,
+obtained from $T'$ by replacing the leaf node for $w$ with an internal node
+having $x, y, z$ as children, represents an optimal prefix code for the alphabet
+$C$.\newline
+
+证明：优于这两棵树的大部分结构相同，我们可以考虑用$T'$的代价$B(T')$来表示$T$的代价$B(T)$。对于
+每一个$c \in C - \{x,y,z\}$，都有$d_T(c) = d_{T'}(c)$，因此$f[c]d_T(c)=f[c]d_{T'}(c)$ 。
+又因为$d_T(x,y,z) = d_{T'}(w)=1$，所以
+
+\begin{eqnarray*}
+f[x]d_T(x) + f[y]d_T(y) + f[z]d_T(z) &=& (f[x]+f[y]+f[z])(d_{T'}(w)+1)\\
+									 &=& f[w]d_{T'}(w) + (f[x]+f[y]+f[z])
+\end{eqnarray*}
+
+因此我可以得出：\newline
+$B(T) = B(T') + f[x]+f[y]+f[z]$\newline
+即\newline
+$B(T') = B(T) - f[x]-f[y]-f[z]$
+
+接下来用反证法来证明，假设$T$不是$C$的最优前缀编码，那么存在一颗树$T''$，使得$B(T'')<B(T)$。
+不失一般性(Lemma 1)，$T''$有$x,y,z$三个兄弟节点。设$T'''$是将$T''$中的$x,y,z$替换为$w$得到
+的树，其中频率$f[w] = f[x]+f[y]+f[z]$。则
+
+\begin{displaymath}
+\begin{array}{ccl}
+B(T''') & = & B(T'') - f[x]-f[y]-f[z]\\
+		& < & B(T) - f[x]-f[y]-f[z]\\
+		& = & B(T') 
+\end{array}
+\end{displaymath}
+
+这与我们的假设的（$T'$为$C'$上的任意一颗最有前缀编码树）矛盾，因此，假设不成立，所以$T$
+是字母表$C$上的最优编码。
+
+综上，此算法产生了最优前缀编码。
 \end{CJK}
 \end{document}
