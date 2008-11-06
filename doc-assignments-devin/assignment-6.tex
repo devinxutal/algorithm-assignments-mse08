@@ -5,16 +5,16 @@
 
 \begin{document}
 \begin{CJK}{UTF8}{gbsn}
-\title{Algorithm Analysis and Design, Assignment 5}
+\title{Algorithm Analysis and Design, Assignment 6}
 \author{徐寅斐, 2008212589}
 \date{\today}
 \maketitle
 
 \section{CLRS, Page 404, Problems 16-4}
 
-\subsection*{思路：}
+\subsection*{a.}
 
-\subsection*{伪码：}
+\subsection*{b.}
 
 \begin{codebox}
 \Procname{$\proc{Optimal-BST}(p,q,n)$}
@@ -22,6 +22,53 @@
 \end{codebox}
 
 \section{CLRS, Page 426, Problems 17-2}
+\subsection*{a.}
+
+通过二叉搜索每个数组来搜索特定的元素，对于某刻特定的数组$A_i$，其数组的大小为0或者$2^i$个，
+则搜索每个数组的最坏情况为$\Theta(\lg{2^i}) = \Theta(i)$，现在假设最坏情况：每一个数组
+都是满的，而且查找的元素在最后一个数组中，则查找它需要的时间是：
+
+\begin{eqnarray*}
+T(n)&=& \Theta(0+1+2+3+ \ldots + k-1)\\
+ &=& \Theta(\frac{k^2 - k}{2})\\
+ &=& \Theta(\frac{1}{2}((\lceil \lg {n+1}\rceil)^2 - \lceil \lg {n+1}\rceil))\\
+ &=& \Theta(\lg ^2 n)
+\end{eqnarray*}
+
+\subsection*{b.}
+
+插入元素时从$A_0$数组开始看，如果为空，则直接将元素插入即可，如果已经含一个元素，则将两个元素合并成一个长度
+为2的数组($A_{tmp}$)放在一边，清空$A_0$，然后看$A_1$，如果$A_1$为空，则将$A_{tmp}$设为$A_1$，即可，否则
+将$A_1$合并到$A_{tmp}$中，然后看$A_2$\ldots，如此循环，直到找到一个为空的数组，由于数组是有序的，每次将
+长度为$2^i$的数组合并成$2^{i+1}$的数组需要$\Theta(2^{i+1})$的时间，即需要线性时间即可。所以，插入一个元素的
+最坏情况是对每一个数组都进行合并，直到$i=k-1$时，合并$A_{k-1}$和$A_{tmp}$，生成一个新的数组$A_k$，此时相当于
+遍历了所有的元素，因此复杂度为$\Theta(n)$
+
+虽然每次插入的最坏情况为$\Theta(n)$，但并不是每次插入都是最坏情况，他取决于n的二进制表示中最右边的0的位置，
+我们可以发现0出现的位置有这样一个规律：每隔一次（每两次），最右边的数组就会出现一次空的情况，即每个一次这个位置会出现在
+最右边，此时的操作数为$\Theta(1)$，每隔三次（每四次），这个位置会出现在右数第二个位置，此时的操作数为$\Theta(2)$，
+每隔七次（每八次），这个位置会出现在右数第四个位置，此时的操作数为$\Theta(8)$，每隔十五次（每十六次），这个位置会出现在右
+数第五个位置，此时的操作数为$\Theta(8)$\ldots。所以，根据这个规律，我们可以得到插入n个数的总次数为
+
+\begin{eqnarray*}
+T(n)&=& \Theta(\frac{n}{2}\cdot 1 + \frac{n}{4}\cdot 2 + \frac{n}{8}\cdot 4 +
+\frac{n}{16}\cdot 8 + \ldots )\\
+\end{eqnarray*}
+
+总共大约有$\lg n$项，每项都为$n/2$，因此，最后的结果为$T(n) = \Theta(n \lg n)$。
+
+因此，每次插入的平均复杂度为$\Theta(\lg n)$
+
+\subsection*{c.}
+
+由于$2^k -1 = 2^{k-1} + 2^{k-2} + 2^{k-3} + \ldots + 2^1 + 2^0$，所以，当某个数组$A_i$中被删去
+一个元素而且所有在$A_i$右边的数组都为空时，可以将$A_i$中的元素刚好分配到其右边的所有数组中。因此有以下算法：
+\begin{itemize}
+  \item 找出要删除的元素$x$所在的数组$A_j$
+  \item 找出从右往左第一个不为空的数组$A_i$
+  \item 如果$j = i$，则删除$x$，把$A_j$中的其他元素有序的放到其右边的各个数组中,将$A_j$设为空
+  \item 如果$j>i$，删除$x$，将$A_i$中第一个元素放入$A_j$，并调整到适当位置，然后将$A_i$中其他元素有序的放到其右边的各个数组中,将$A_i$设为空
+\end{itemize}
 
 \end{CJK}
 \end{document}
