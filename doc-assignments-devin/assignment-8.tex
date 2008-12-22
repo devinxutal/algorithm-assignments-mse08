@@ -1,0 +1,69 @@
+\documentclass{article}
+
+\usepackage{CJK}
+\usepackage{clrscode}
+
+\begin{document}
+\begin{CJK}{UTF8}{gbsn}
+\title{Algorithm Analysis and Design, Assignment 7}
+\author{徐寅斐, 2008212589}
+\date{\today}
+
+\maketitle
+
+\section{CLRS, Page 549, Problem 22.3-12}
+
+\subsection*{a}
+假设在新增的一条边为$(u,v)$，这表示，所有能够到达$u$的节点能够到达$v$，因此所有能够到达$u$的节点
+能够到达$v$能够到达的所有节点。因此，对于任意两点$i,j$，如果边$(i,u)$和$(v,j)$都存在，则
+$(i,j)$也存在。
+
+假设算法建立在一个$|V| \times |V| $矩阵的矩阵上，初始状态下不存在边，因此矩阵中都为0，但
+对角线上都为1，因为所有的节点都可以到达自己。则算法如下：
+
+\begin{codebox}
+\Procname{$\proc{Update-Transitive-Closure}(u,v)$}
+\li \For $i \gets 1$ to $|V|$
+\li 	\Do \For $j \gets 1$ to $|V|$
+\li 			\Do \If $T[i, u] = 1$ and $T[v, j] = 1$
+\li						\Then $T[i, j] \gets 1$
+						\End
+				\End
+		\End
+\end{codebox}
+
+本算法对矩阵做了一次遍历，因此复杂度为$\Theta(V^2)$。
+
+\subsection*{b}
+假设一个含有$n$个顶点的图中只存在这样一条路径$v_1 \to v_2 \to \ldots \to v_n$，那么，这个
+图的传递闭包中含有$n(n+1)/2$条边（包括所有对角线上的1）。在计入一条边$(v_n, v_1)$之后，任意两个
+顶点都可以互相到达，因此，在其传递闭包中有$n^2$条边，也就是说，有$n^2 - n(n+1)/2 = \Theta(V^2)$
+条边被更新了，因此，更新操作至少需要花费$\Omega(n^2)$的时间。
+
+\subsection*{c}
+分析a中的算法可以看出，内层循环中存在了很多重复劳动。算法中我们将所有的$(i,u),(v,j)$都存在的点对$(i,j)$
+之间的边加上，即令$T[i,j]=1$，但是，如果$T[i,v]$已经为1，则对于所有$T[v,j]=1$的点$j$来说，$T[i,j]$
+早就已经是1了，不需要重复设置。因此，这里的改进算法是不去重复设置这些已经为1的地方：
+
+\begin{codebox}
+\Procname{$\proc{Update-Transitive-Closure}(u,v)$}
+\li \For $i \gets 1$ to $|V|$
+\li 	\Do \If $T[i,u = 1]$ and $T[i,v] = 0$
+\li 			\Then \For $j \gets 1$ to $|V|$
+\li						\Do \If $T[v,j] = 1$
+\li 							\Then $T[i,j] = 1$
+								\End
+						\End
+				\End
+		\End
+\end{codebox}
+
+这个算法虽然有两层循环，在插入$V^2$条边的时候看似需要$O(V^4)$的时间，但其实不需要：
+\begin{itemize}
+  \item 由于可能有$O(V^2)$条边插入,因此算法前两行会被执行$O(V^3)$次
+  \item
+  第三行到第五行，由于第二行有一个条件判断，只有当$T[i,v]=0$时才会执行，又因每次运行完这三行后至少减少一个0的位置（$T[i,v]$），矩阵中总共只有$V^2$个位置，因此，最后三行最多只会被执行$V^2$次，每次执行时间为$O(V)$，总时间花费也是$O(V^3)$。
+  \item 因此，总的时间复杂度为$O(V^3)$
+\end{itemize}
+\end{CJK}
+\end{document}
