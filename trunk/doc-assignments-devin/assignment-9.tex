@@ -1,0 +1,92 @@
+\documentclass{article}
+
+\usepackage{CJK}
+\usepackage{clrscode}
+
+\begin{document}
+\begin{CJK}{UTF8}{gbsn}
+\title{Algorithm Analysis and Design, Assignment 7}
+\author{徐寅斐, 2008212589}
+\date{\today}
+
+\maketitle
+
+\section{CLRS, Page 931, Problem 32.4-6}
+
+\subsection*{思路}
+
+这里的复杂度有$O(m^3|\Sigma|)$，主要是因为在计算状态迁移函数时使用了大量
+的Naive的字符串匹配，其实不用这么繁琐。当前k-1个状态前移已经计算出来后，从k状
+态开始的状态前移只需要根据几个字符以及前面的状态推算出来，不需要进行大量的字符
+串匹配，这里借用了KMP算法中前缀子串的概念，我们可以很容易得证明：如果$q <m$且
+$P[q+1] = a$，则$\delta(q,a) = q+1$；如果$q = m$或者 $P[q+1]\neq a$，
+则$\delta(q,a) = \delta(\pi[q],a)$。\newline\newline
+
+证明：
+\subsubsection*{a.如果$q <m$且$P[q+1] = a$，则$\delta(q,a) = q+1$}
+因为$P[q+1] = a$，所以$P_qa = P_qP[q+1] = P_{q+1}$，因此$P_{q+1} \sqsupset
+P_qa$，所以$\sigma(P_qa) = q+1$，因此$\delta(q,a) = q+1$。
+
+\subsubsection*{b.如果$q = m$或者 $P[q+1]\neq a$，则$\delta(q,a) = \delta(\pi[q],a)$}
+\begin{itemize}
+  \item $q<m$且$P[q+1]\neq a$时，这时考虑$\pi[q]$，由于$\pi[q] = max{k: k<q,P_k
+  \sqsupset P_q}$，即最大的$k$，使得$P[1]\ldots P[k] = P[q-k+1]\ldots
+  P[q]$。这时接受$a$之后转移的状态必然小于q+1，而当前已接受的字符序列中，最后$k$位为小于q的P的最大前缀，
+  即现在的状态可以看成是在k状态时接受字符$a$，因此，可以得到$\delta(q,a) = \delta(\pi[q],a)$。
+  \item $q=m$时，由于已经没有状态$q+1$，只能从当前序列中找出小于q的P的最长前缀，在此基础上进行
+  状态迁移，而这个最长前缀必然为$\pi[k]$，因此$\delta(q,a) = \delta(\pi[q],a)$。
+\end{itemize}
+
+\subsection*{伪码}
+
+计算前缀函数$\pi$：
+
+\begin{codebox}
+\Procname{$\proc{Compute-Prefix-Function}(P)$}
+\li $m \gets length[P]$
+\li $\pi[1] \gets 0$
+\li $k \gets 0$
+\li \For $q \gets 2$ to $m$
+\li		\Do \While $k > 0 $ and $P[k+1] \neq P[q]$
+\li				\Do $k \gets \pi[k]$
+				\End
+\li			\If $P[k+1] = P[q]$
+\li				\Then $k \gets k+1$
+				\End
+\li			$\pi[q] \gets k$
+		\End
+\li \Return $\pi$		
+\end{codebox}
+
+计算状态迁移函数$\delta$：
+
+\begin{codebox}
+\Procname{$\proc{Compute-Transition-Function}(P,\Sigma)$}
+\li $\pi \gets \proc{Compute-Prefix-Function}(P)$
+\li $m \gets length[P]$
+\li \For each character $a \in \Sigma$
+\li 	\Do \If $P[1] = a$
+\li				\Then $\delta(0,a) \gets 1$
+\li				\Else $\delta(0,a) \gets 0$
+				\End
+		\End
+\li \For $q \gets 1$ to $m$
+\li		\Do \For each character $a \in \Sigma$
+\li				\Do \If $q = m$ or $P[q+1] \neq a$
+\li						\Then $\delta(q,a) \gets \delta(\pi[q],a)$
+\li						\Else $\delta(q,a) \gets q+1$
+						\End
+				\End
+		\End
+\li \Return $\delta$
+\end{codebox}
+
+\subsection*{复杂度分析}
+
+我们已经知道，计算前缀函数的复杂度是$O(m)$的，而计算状态迁移函数时，很容易看出，
+3 - 6行一重循环，复杂度为$O(m)$， 7 - 11行为嵌套循环，外层循环$m$次，内层循环
+$|\Sigma|$次，因此复杂度为$O(m|\Sigma|)$，所以，总复杂度为$O(m|\Sigma|)$。
+
+
+\end{CJK}
+\end{document}
